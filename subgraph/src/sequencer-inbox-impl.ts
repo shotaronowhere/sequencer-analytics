@@ -113,7 +113,7 @@ export function handleSequencerBatchDelivered(
   entity.Tr = Tr
   entity.E = Tr.minus(Tf)
   const E = Tr.minus(Tf)
-  const D = BigInt.fromU64(60*60*3) // 3 hr
+  const D = BigInt.fromU64(60*60*1) // 1 hr
   const R_inv = BigInt.fromU64(12) // 1/12 
   const U = event.block.timestamp.gt(Tf.plus(D)) ? event.block.timestamp.minus(Tf.plus(D)) : BigInt.fromI32(0)
   entity.U = U
