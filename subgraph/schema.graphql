@@ -1,0 +1,209 @@
+type AdminChanged @entity(immutable: true) {
+  id: Bytes!
+  previousAdmin: Bytes! # address
+  newAdmin: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type BeaconUpgraded @entity(immutable: true) {
+  id: Bytes!
+  beacon: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Upgraded @entity(immutable: true) {
+  id: Bytes!
+  implementation: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+
+type BridgeCallTriggered @entity(immutable: true) {
+  id: Bytes!
+  outbox: Bytes! # address
+  to: Bytes! # address
+  value: BigInt! # uint256
+  data: Bytes! # bytes
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type InboxToggle @entity(immutable: true) {
+  id: Bytes!
+  inbox: Bytes! # address
+  enabled: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type MessageDelivered @entity(immutable: true) {
+  id: String!
+  messageIndex: BigInt! # uint256
+  beforeInboxAcc: Bytes! # bytes32
+  inbox: Bytes! # address
+  kind: Int! # uint8
+  sender: Bytes! # address
+  messageDataHash: Bytes! # bytes32
+  baseFeeL1: BigInt! # uint256
+  timestamp: BigInt! # uint64
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+  MessageSequenced: MessageSequenced @derivedFrom(field: "messageDelivered")
+}
+
+type GlobalStat @entity{
+  id: String!
+  U_NoDelay_Sum: BigInt!
+  U_NoDelay_Count: BigInt!
+  U_NoDelay_Avg: BigInt!
+}
+
+type MessageSequenced @entity(immutable: true) {
+  id: String!
+  messageNum: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  delayTime: BigInt!
+  delayBlocks: BigInt!
+  transactionHash: Bytes!
+  messageDelivered: MessageDelivered!
+}
+
+type OutboxToggle @entity(immutable: true) {
+  id: Bytes!
+  outbox: Bytes! # address
+  enabled: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SequencerInboxUpdated @entity(immutable: true) {
+  id: Bytes!
+  newSequencerInbox: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type InvalidateKeyset @entity(immutable: true) {
+  id: Bytes!
+  keysetHash: Bytes! # bytes32
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnerFunctionCalled @entity(immutable: true) {
+  id: Bytes!
+  SequencerInboxImpl_id: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SequencerBatchDelivered @entity(immutable: true) {
+  id: String!
+  batchSequenceNumber: BigInt! # uint256
+  beforeAcc: Bytes! # bytes32
+  afterAcc: Bytes! # bytes32
+  delayedAcc: Bytes! # bytes32
+  afterDelayedMessagesRead: BigInt! # uint256
+  timeBounds_minTimestamp: BigInt! # uint64
+  timeBounds_maxTimestamp: BigInt! # uint64
+  timeBounds_minBlockNumber: BigInt! # uint64
+  timeBounds_maxBlockNumber: BigInt! # uint64
+  dataLocation: Int! # uint8
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+  B: BigInt!
+  Tf: BigInt!
+  Tr: BigInt!
+  E: BigInt!
+  U: BigInt!
+  U_NoDelay: BigInt!
+}
+
+type SetValidKeyset @entity(immutable: true) {
+  id: Bytes!
+  keysetHash: Bytes! # bytes32
+  keysetBytes: Bytes! # bytes
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+type InboxAdminChanged @entity(immutable: true) {
+  id: Bytes!
+  previousAdmin: Bytes! # address
+  newAdmin: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type InboxUpgraded @entity(immutable: true) {
+  id: Bytes!
+  implementation: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+type AllowListAddressSet @entity(immutable: true) {
+  id: Bytes!
+  user: Bytes! # address
+  val: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type AllowListEnabledUpdated @entity(immutable: true) {
+  id: Bytes!
+  isEnabled: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type InboxImplInboxMessageDelivered @entity(immutable: true) {
+  id: Bytes!
+  messageNum: BigInt! # uint256
+  data: Bytes! # bytes
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type InboxImplInboxMessageDeliveredFromOrigin @entity(immutable: true) {
+  id: Bytes!
+  messageNum: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Paused @entity(immutable: true) {
+  id: Bytes!
+  account: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Unpaused @entity(immutable: true) {
+  id: Bytes!
+  account: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}

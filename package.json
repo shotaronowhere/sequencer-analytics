@@ -1,0 +1,24 @@
+{
+  "name": "sequencer-analytics",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "cd subgraph && graph codegen",
+    "generate:gql": "graphql-codegen --config codegen.yml",
+    "build": "cd subgraph && graph build",
+    "deploy": "cd subgraph && graph deploy --node https://api.thegraph.com/deploy/ shotaronowhere/sequencer-analytics",
+    "create-local": "cd subgraph && graph create --node http://localhost:8020/ shotaronowhere/sequencer-analytics",
+    "remove-local": "cd subgraph && graph remove --node http://localhost:8020/ shotaronowhere/sequencer-analytics",
+    "deploy-local": "cd subgraph && graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 shotaronowhere/sequencer-analytics"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.63.1",
+    "@graphprotocol/graph-ts": "0.32.0",
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/typescript": "^4.0.1",
+    "@graphql-codegen/typescript-graphql-request": "^6.0.1",
+    "@graphql-codegen/typescript-operations": "^4.0.1"
+  },
+  "devDependencies": {
+    "matchstick-as": "0.5.0"
+  }
+}

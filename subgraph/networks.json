@@ -1,0 +1,17 @@
+{
+  "mainnet": {
+    "SequencerInbox": {
+      "address": "0x1c479675ad559DC151F6Ec7ed3FbF8ceE79582B6",
+      "startBlock": 15411056
+    },
+    "SequencerInboxImpl": {
+      "address": "0xd03bfe2ce83632f4e618a97299cc91b1335bb2d9"
+    },
+    "Inbox": {
+      "address": "0x4Dbd4fc535Ac27206064B68FfCf827b0A60BAB3f"
+    },
+    "InboxImpl": {
+      "address": "0x5aED5f8A1e3607476F1f81c3d8fe126deB0aFE94"
+    }
+  }
+}
