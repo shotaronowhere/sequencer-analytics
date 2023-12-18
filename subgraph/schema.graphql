@@ -57,7 +57,6 @@ type MessageDelivered @entity(immutable: true) {
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
-  MessageSequenced: MessageSequenced @derivedFrom(field: "messageDelivered")
 }
 
 type GlobalStat @entity{
@@ -65,17 +64,16 @@ type GlobalStat @entity{
   U_NoDelay_Sum: BigInt!
   U_NoDelay_Count: BigInt!
   U_NoDelay_Avg: BigInt!
+  batchPostCount: BigInt!
 }
 
-type MessageSequenced @entity(immutable: true) {
+type HourlyStat @entity{
   id: String!
-  messageNum: BigInt! # uint256
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  delayTime: BigInt!
-  delayBlocks: BigInt!
-  transactionHash: Bytes!
-  messageDelivered: MessageDelivered!
+  timestamp: BigInt!
+  U_NoDelay_Sum: BigInt!
+  U_NoDelay_Count: BigInt!
+  U_NoDelay_Avg: BigInt!
+  batchPostCount: BigInt!
 }
 
 type OutboxToggle @entity(immutable: true) {
@@ -127,11 +125,11 @@ type SequencerBatchDelivered @entity(immutable: true) {
   blockTimestamp: BigInt!
   transactionHash: Bytes!
   B: BigInt!
-  Tf: BigInt!
-  Tr: BigInt!
+  Tf: BigInt
+  Tr: BigInt
   E: BigInt!
-  U: BigInt!
-  U_NoDelay: BigInt!
+  U: BigInt
+  U_NoDelay: BigInt
 }
 
 type SetValidKeyset @entity(immutable: true) {

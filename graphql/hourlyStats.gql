@@ -1,0 +1,6 @@
+query hourlyStats($ts: BigInt){
+  hourlyStats(first: 1000, orderBy: timestamp, orderDirection: asc, where: {timestamp_gt: $ts}) {
+    U_NoDelay_Avg
+    timestamp
+  }
+}

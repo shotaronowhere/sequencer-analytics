@@ -1,9 +1,0 @@
-query messageSequencedFromBlock($blockNumberDeliveredInDelayedInboxL1: BigInt!){
-    messageSequenceds(first: 1000, where: {messageDelivered_: {blockNumber: $blockNumberDeliveredInDelayedInboxL1}}){
-        delayTime
-        delayBlocks
-        messageDelivered{
-        blockNumber
-        }
-  }
-}

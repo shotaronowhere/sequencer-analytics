@@ -2,10 +2,11 @@
   "name": "sequencer-analytics",
   "license": "UNLICENSED",
   "scripts": {
+    "start": "npx ts-node src/index.ts",
     "codegen": "cd subgraph && graph codegen",
-    "generate:gql": "graphql-codegen --config codegen.yml",
+    "generate": "graphql-codegen --config codegen.yml",
     "build": "cd subgraph && graph build",
-    "deploy": "cd subgraph && graph deploy --node https://api.thegraph.com/deploy/ shotaronowhere/sequencer-analytics",
+    "deploy": "cd subgraph && graph deploy --node https://api.thegraph.com/deploy/ shotaronowhere/sequencer-analytics-nova",
     "create-local": "cd subgraph && graph create --node http://localhost:8020/ shotaronowhere/sequencer-analytics",
     "remove-local": "cd subgraph && graph remove --node http://localhost:8020/ shotaronowhere/sequencer-analytics",
     "deploy-local": "cd subgraph && graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 shotaronowhere/sequencer-analytics"
@@ -16,7 +17,9 @@
     "@graphql-codegen/cli": "^5.0.0",
     "@graphql-codegen/typescript": "^4.0.1",
     "@graphql-codegen/typescript-graphql-request": "^6.0.1",
-    "@graphql-codegen/typescript-operations": "^4.0.1"
+    "@graphql-codegen/typescript-operations": "^4.0.1",
+    "fast-csv": "^4.3.6",
+    "typescript": "^5.3.3"
   },
   "devDependencies": {
     "matchstick-as": "0.5.0"

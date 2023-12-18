@@ -1,4 +1,4 @@
-{
+query sequencerBatchDelivereds($tmp: BigInt){
   sequencerBatchDelivereds(first: 1000, where: {batchSequenceNumber_gt: 10, batchSequenceNumber_lte: 100}){
     batchSequenceNumber
     B

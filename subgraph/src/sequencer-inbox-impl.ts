@@ -10,9 +10,9 @@ import {
   OwnerFunctionCalled,
   SequencerBatchDelivered,
   SetValidKeyset,
-  MessageSequenced,
   MessageDelivered,
-  GlobalStat
+  GlobalStat,
+  HourlyStat
 } from "../generated/schema"
 
 export function handleInvalidateKeyset(event: InvalidateKeysetEvent): void {
@@ -46,6 +46,31 @@ export function handleOwnerFunctionCalled(
 export function handleSequencerBatchDelivered(
   event: SequencerBatchDeliveredEvent
 ): void {
+  let hourlyStat = HourlyStat.load((event.block.timestamp.div(BigInt.fromI32(3600))).toHexString())
+  if (hourlyStat == null) {
+    hourlyStat = new HourlyStat((event.block.timestamp.div(BigInt.fromI32(3600))).toHexString())
+    hourlyStat.U_NoDelay_Avg = BigInt.fromI32(0)
+    hourlyStat.U_NoDelay_Count = BigInt.fromI32(0)
+    hourlyStat.U_NoDelay_Sum = BigInt.fromI32(0)
+    hourlyStat.batchPostCount = BigInt.fromI32(0)
+    hourlyStat.timestamp = event.block.timestamp.div(BigInt.fromI32(3600))
+  }
+
+  hourlyStat.batchPostCount = hourlyStat.batchPostCount.plus(BigInt.fromI32(1))
+  hourlyStat.save()
+
+  let stats = GlobalStat.load("stats")
+  if (stats == null) {
+    stats = new GlobalStat("stats")
+    stats.U_NoDelay_Avg = BigInt.fromI32(0)
+    stats.U_NoDelay_Count = BigInt.fromI32(0)
+    stats.U_NoDelay_Sum = BigInt.fromI32(0)
+    stats.batchPostCount = BigInt.fromI32(0)
+  }
+
+  stats.batchPostCount = stats.batchPostCount.plus(BigInt.fromI32(1))
+  stats.save()
+
   let entity = new SequencerBatchDelivered(
     event.params.batchSequenceNumber.toHexString()
   )
@@ -64,80 +89,114 @@ export function handleSequencerBatchDelivered(
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
 
+  const D = BigInt.fromU64(60*60*4) // 1 hr
+  const R_inv = BigInt.fromU64(12) // 1/12 
+
+  let prevBatch = SequencerBatchDelivered.load(event.params.batchSequenceNumber.minus(BigInt.fromI32(1)).toHexString())
   if (event.params.batchSequenceNumber.equals(BigInt.fromI32(0))) {
     entity.B = BigInt.fromI32(86400*2) // 48 hours
-  } else {
-    let prevEntity = SequencerBatchDelivered.load(event.params.batchSequenceNumber.minus(BigInt.fromI32(1)).toHexString())
-    if (prevEntity == null) {
-      log.error("SequencerBatchDelivered entity not found for batchSequenceNumber {}", [event.params.batchSequenceNumber.minus(BigInt.fromI32(1)).toHexString()])
-      entity.B = BigInt.fromI32(86400*2) // 48 hours
-    } else {
-      entity.B = prevEntity.B
-    }
-  }
-
-  let Tr = event.block.timestamp;
-  let msgSequencedEntityTr = MessageDelivered.load(event.params.afterDelayedMessagesRead.toHexString())
-  if (msgSequencedEntityTr != null) {
-    Tr = msgSequencedEntityTr.blockTimestamp
-  } else {
-    log.info("MessageSequenced entity not found for batchSequenceNumber {}", [event.params.afterDelayedMessagesRead.toHexString()])
-  }
-
-  let Tf = Tr;
-
-  for(let i = event.params.afterDelayedMessagesRead.minus(BigInt.fromU32(1)); i.gt(BigInt.fromI32(-1)); i = i.minus(BigInt.fromU32(1))) {
-    let msgSequencedEntity = MessageSequenced.load(i.toHexString())
-    if (msgSequencedEntity == null) {
-      msgSequencedEntity = new MessageSequenced(i.toHexString())
-      msgSequencedEntity.blockNumber = event.block.number
-      msgSequencedEntity.blockTimestamp = event.block.timestamp
-      msgSequencedEntity.transactionHash = event.transaction.hash
-      msgSequencedEntity.messageNum = i
-      msgSequencedEntity.messageDelivered = i.toHexString()
-      let msgDeliveredEntity = MessageDelivered.load(msgSequencedEntity.messageDelivered)
-      if (msgDeliveredEntity == null){
-        log.error("MessageDelivered entity not found for MessageSequenced entity {}", [msgSequencedEntity.messageDelivered])
-        continue;
+    entity.E = BigInt.fromI32(0)
+    if (entity.afterDelayedMessagesRead.gt(BigInt.fromI32(0))){
+      
+      let Tr = event.block.timestamp;
+      let Nr = MessageDelivered.load(event.params.afterDelayedMessagesRead.toHexString())
+      if (Nr != null) {
+        Tr = Nr.blockTimestamp
       } else {
-        msgSequencedEntity.delayBlocks = event.block.number.minus(msgDeliveredEntity.blockNumber)
-        msgSequencedEntity.delayTime = event.block.timestamp.minus(msgDeliveredEntity.blockTimestamp)
-        msgSequencedEntity.save()
-        Tf = msgDeliveredEntity.blockTimestamp
+        // all delayed messages are sequenced
       }
+
+      let Nf = MessageDelivered.load(BigInt.fromI32(0).toHexString())
+      if (Nf == null) {
+        log.error("MessageDelivered entity not found for delayed msg num {}", [BigInt.fromI32(0).toHexString()])
+        return
+      }
+    
+      const Tf = Nf.blockTimestamp
+      const E = Tr.minus(Tf)
+
+      entity.Tf = Tf
+      entity.Tr = Tr
+      entity.E = E
+      const U = event.block.timestamp.gt(Tf.plus(D)) ? event.block.timestamp.minus(Tf.plus(D)) : BigInt.fromI32(0)
+      entity.U = U
+      const U_NoDelay = event.block.timestamp.minus(Tf)
+      entity.U_NoDelay = U_NoDelay
+      let B_update = entity.B.plus(E.div(R_inv)).minus( E.gt(U) ? U : E)
+      // saturate
+      B_update = B_update.gt(BigInt.fromU32(0)) ? B_update : BigInt.fromU32(0)
+      B_update = B_update.gt(BigInt.fromI32(86400*2)) ? BigInt.fromI32(86400*2) : B_update
+      entity.B = B_update
+
+      stats.U_NoDelay_Count = stats.U_NoDelay_Count.plus(BigInt.fromI32(1))
+      stats.U_NoDelay_Sum = stats.U_NoDelay_Sum.plus(U_NoDelay)
+      stats.U_NoDelay_Avg = stats.U_NoDelay_Sum.div(stats.U_NoDelay_Count)
+      stats.save()
+
+      hourlyStat.U_NoDelay_Count = hourlyStat.U_NoDelay_Count.plus(BigInt.fromI32(1))
+      hourlyStat.U_NoDelay_Sum = hourlyStat.U_NoDelay_Sum.plus(U_NoDelay)
+      hourlyStat.U_NoDelay_Avg = hourlyStat.U_NoDelay_Sum.div(hourlyStat.U_NoDelay_Count)
+      hourlyStat.save()
+    }
+    entity.save()
+  } else {
+    if (prevBatch == null) {
+      log.error("SequencerBatchDelivered entity not found for batchSequenceNumber {}", [event.params.batchSequenceNumber.minus(BigInt.fromI32(1)).toHexString()])
+      return
+    } 
+  
+    if (entity.afterDelayedMessagesRead.gt(prevBatch.afterDelayedMessagesRead)){
+  
+      let Tr = event.block.timestamp;
+      let Nr = MessageDelivered.load(event.params.afterDelayedMessagesRead.toHexString())
+      if (Nr != null) {
+        Tr = Nr.blockTimestamp
+      } else {
+        // all delayed messages are sequenced
+      }
+
+      let Nf = MessageDelivered.load(prevBatch.afterDelayedMessagesRead.toHexString())
+      if (Nf == null) {
+        log.error("MessageDelivered entity not found for delayed msg num {}", [prevBatch.afterDelayedMessagesRead.toHexString()])
+        return
+      }
+    
+      const Tf = Nf.blockTimestamp
+      const E = Tr.minus(Tf)
+
+      entity.Tf = Tf
+      entity.Tr = Tr
+      entity.E = E
+      const D = BigInt.fromU64(60*60*3) // 3 hr
+      const R_inv = BigInt.fromU64(12) // 1/12 
+      const U = event.block.timestamp.gt(Tf.plus(D)) ? event.block.timestamp.minus(Tf.plus(D)) : BigInt.fromI32(0)
+      entity.U = U
+      const U_NoDelay = event.block.timestamp.minus(Tf)
+      entity.U_NoDelay = U_NoDelay
+      
+      let B_update = prevBatch.B.plus(E.div(R_inv)).minus( E.gt(U) ? U : E)
+      // saturate
+      B_update = B_update.gt(BigInt.fromU32(0)) ? B_update : BigInt.fromU32(0)
+      B_update = B_update.gt(BigInt.fromI32(86400*2)) ? BigInt.fromI32(86400*2) : B_update
+      entity.B = B_update
+    
+      entity.save()
+
+      stats.U_NoDelay_Count = stats.U_NoDelay_Count.plus(BigInt.fromI32(1))
+      stats.U_NoDelay_Sum = stats.U_NoDelay_Sum.plus(U_NoDelay)
+      stats.U_NoDelay_Avg = stats.U_NoDelay_Sum.div(stats.U_NoDelay_Count)
+      stats.save()
+
+      hourlyStat.U_NoDelay_Count = hourlyStat.U_NoDelay_Count.plus(BigInt.fromI32(1))
+      hourlyStat.U_NoDelay_Sum = hourlyStat.U_NoDelay_Sum.plus(U_NoDelay)
+      hourlyStat.U_NoDelay_Avg = hourlyStat.U_NoDelay_Sum.div(hourlyStat.U_NoDelay_Count)
+      hourlyStat.save()
     } else {
-      break;
+      entity.B = prevBatch.B
+      entity.E = BigInt.fromI32(0)
+      entity.save()
     }
   }
-  entity.Tf = Tf
-  entity.Tr = Tr
-  entity.E = Tr.minus(Tf)
-  const E = Tr.minus(Tf)
-  const D = BigInt.fromU64(60*60*1) // 1 hr
-  const R_inv = BigInt.fromU64(12) // 1/12 
-  const U = event.block.timestamp.gt(Tf.plus(D)) ? event.block.timestamp.minus(Tf.plus(D)) : BigInt.fromI32(0)
-  entity.U = U
-  entity.U_NoDelay = event.block.timestamp.minus(Tf)
-  let B_update = entity.B.plus(E.div(R_inv)).minus( E.gt(U) ? U : E)
-  // saturate
-  B_update = B_update.gt(BigInt.fromU32(0)) ? B_update : BigInt.fromU32(0)
-  B_update = B_update.gt(BigInt.fromI32(86400*2)) ? BigInt.fromI32(86400*2) : B_update
-  entity.B = B_update
-
-  entity.save()
-
-  let stats = GlobalStat.load("stats")
-  if (stats == null) {
-    stats = new GlobalStat("stats")
-    stats.U_NoDelay_Avg = BigInt.fromI32(0)
-    stats.U_NoDelay_Count = BigInt.fromI32(0)
-    stats.U_NoDelay_Sum = BigInt.fromI32(0)
-  }
-
-  stats.U_NoDelay_Sum = stats.U_NoDelay_Sum.plus(entity.U_NoDelay)
-  stats.U_NoDelay_Count = stats.U_NoDelay_Count.plus(BigInt.fromI32(1))
-  stats.U_NoDelay_Avg = stats.U_NoDelay_Sum.div(stats.U_NoDelay_Count)
-  stats.save()
 }
 
 export function handleSetValidKeyset(event: SetValidKeysetEvent): void {

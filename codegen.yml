@@ -1,8 +1,8 @@
 overwrite: true
 generates:
-  ./generated/kleros-display-graphql.ts:
+  ./generated/sequencer-analysis.ts:
     schema: "https://api.thegraph.com/subgraphs/name/shotaronowhere/sequencer-analytics"
-    documents: "graphql/klerosdisplay/*.gql"
+    documents: "graphql/*.gql"
     plugins:
       - "typescript"
       - "typescript-operations"
