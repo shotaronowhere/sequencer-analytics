@@ -1,5 +1,7 @@
 # Sequencer Analytics
 
+Fetches data from subgraphs indexing sequencer performance and writes the data to a csv. Export into your data viz tool of choice. See ```gas.csv``` and ```delay.csv``` for sample data.
+
 ### Install the dependencies
 
 ```bash
