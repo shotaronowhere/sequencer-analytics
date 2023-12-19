@@ -2,7 +2,14 @@ overwrite: true
 generates:
   ./generated/sequencer-analysis.ts:
     schema: "https://api.thegraph.com/subgraphs/name/shotaronowhere/sequencer-analytics"
-    documents: "graphql/*.gql"
+    documents: "graphql/delay/*.gql"
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-graphql-request"
+  ./generated/arb-gas.ts:
+    schema: "https://api.thegraph.com/subgraphs/name/shotaronowhere/arb-gas-analytics-sparse"
+    documents: "graphql/arbGas/*.gql"
     plugins:
       - "typescript"
       - "typescript-operations"

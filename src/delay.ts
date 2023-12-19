@@ -4,7 +4,7 @@ import * as csv from 'fast-csv';
 import * as fs from 'fs';
 const csvStream = csv.format({ headers: true });
 
-var writeStream = fs.createWriteStream("outputfile.csv");
+var writeStream = fs.createWriteStream("delay.csv");
 csvStream.pipe(writeStream).on('end', () => process.exit());
 
 const sdk = getSdk(new GraphQLClient("https://api.thegraph.com/subgraphs/name/shotaronowhere/sequencer-analytics"));

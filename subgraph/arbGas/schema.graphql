@@ -1,0 +1,10 @@
+type blockInfo @entity(immutable: true) {
+  id: Bytes!
+  blockNumber: BigInt!
+  gasBlocklog: BigInt!
+  timestamp: BigInt!
+  l2GasPrice: BigInt
+  l1GasPrice: BigInt!
+  l1PricingSurplus: BigInt!
+  batchNum: BigInt
+}

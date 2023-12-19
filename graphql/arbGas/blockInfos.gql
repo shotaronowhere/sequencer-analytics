@@ -1,0 +1,10 @@
+query blockInfos($block: BigInt){
+  blockInfos(first: 1000, orderBy: blockNumber, orderDirection: asc, where: {blockNumber_gt: $block}) {
+    blockNumber
+    timestamp
+    l1GasPrice
+    l2GasPrice
+    l1PricingSurplus
+    gasBlocklog
+  }
+}
