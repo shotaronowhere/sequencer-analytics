@@ -11,14 +11,14 @@
     "build": "cd subgraph/arbGas && graph build",
     "build:gas": "cd subgraph/sequencerDelay && graph build",
     "build:delay": "cd subgraph && graph build",
-    "deploy:delay": "cd subgraph && graph deploy --node https://api.thegraph.com/deploy/ shotaronowhere/sequencer-analytics-nova",
-    "deploy:gas": "cd subgraph && graph deploy --node https://api.thegraph.com/deploy/ shotaronowhere/sequencer-analytics-nova",
+    "deploy:delay": "cd subgraph/sequencerDelay && graph deploy --node https://api.thegraph.com/deploy/ shotaronowhere/sequencer-analytics-nova",
+    "deploy:gas": "cd subgraph/arbGas && graph deploy --node https://api.thegraph.com/deploy/ shotaronowhere/arb-gas-analytics-sparse",
     "create-local": "cd subgraph && graph create --node http://localhost:8020/ shotaronowhere/sequencer-analytics",
     "remove-local": "cd subgraph && graph remove --node http://localhost:8020/ shotaronowhere/sequencer-analytics",
     "deploy-local": "cd subgraph && graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 shotaronowhere/sequencer-analytics"
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "0.63.1",
+    "@graphprotocol/graph-cli": "0.64.0",
     "@graphprotocol/graph-ts": "0.32.0",
     "@graphql-codegen/cli": "^5.0.0",
     "@graphql-codegen/typescript": "^4.0.1",
