@@ -8,3 +8,17 @@ type blockInfo @entity(immutable: true) {
   l1PricingSurplus: BigInt!
   batchNum: BigInt
 }
+
+type hourlyStat @entity{
+  id: String!
+  timestamp: BigInt!
+  l2GasPriceSum: BigInt!
+  gasBlocklogSum: BigInt!
+  l1PricingSurplusSum: BigInt!
+  l1GasPriceSum: BigInt!
+  l2GasPriceAvg: BigInt!
+  gasBlocklogAvg: BigInt!
+  l1PricingSurplusAvg: BigInt!
+  l1GasPriceAvg: BigInt!
+  count: BigInt!
+}
