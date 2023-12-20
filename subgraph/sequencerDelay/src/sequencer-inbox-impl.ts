@@ -12,7 +12,9 @@ import {
   SetValidKeyset,
   MessageDelivered,
   GlobalStat,
-  HourlyStat
+  HourlyStat,
+  BatchReport,
+  BatchReportSequenced
 } from "../generated/schema"
 
 export function handleInvalidateKeyset(event: InvalidateKeysetEvent): void {
@@ -144,9 +146,23 @@ export function handleSequencerBatchDelivered(
       log.error("SequencerBatchDelivered entity not found for batchSequenceNumber {}", [event.params.batchSequenceNumber.minus(BigInt.fromI32(1)).toHexString()])
       return
     } 
-  
+
     if (entity.afterDelayedMessagesRead.gt(prevBatch.afterDelayedMessagesRead)){
   
+      let batchReport = BatchReport.load(prevBatch.afterDelayedMessagesRead.toHexString())
+      if (batchReport == null) {
+        log.info("batchReport entity not found for delayed msg num {}", [prevBatch.afterDelayedMessagesRead.toHexString()])
+      } else { // batch report
+          let batchReportSequenced = new BatchReportSequenced(prevBatch.afterDelayedMessagesRead.toHexString())
+          batchReportSequenced.batchNum = event.params.batchSequenceNumber
+          let msgDelivered = MessageDelivered.load(batchReport.messageDelivered)
+          if (msgDelivered != null) {
+            batchReportSequenced.delay = event.block.timestamp.minus(msgDelivered.blockTimestamp)
+          }
+          batchReportSequenced.batchReport = prevBatch.afterDelayedMessagesRead.toHexString()
+          batchReportSequenced.save()
+      } 
+
       let Tr = event.block.timestamp;
       let Nr = MessageDelivered.load(event.params.afterDelayedMessagesRead.toHexString())
       if (Nr != null) {

@@ -10,8 +10,10 @@ import {
   InboxToggle,
   MessageDelivered,
   OutboxToggle,
-  SequencerInboxUpdated
+  SequencerInboxUpdated,
+  BatchReport
 } from "../generated/schema"
+import { BigInt, log } from "@graphprotocol/graph-ts"
 
 export function handleBridgeCallTriggered(
   event: BridgeCallTriggeredEvent
@@ -58,11 +60,28 @@ export function handleMessageDelivered(event: MessageDeliveredEvent): void {
   entity.baseFeeL1 = event.params.baseFeeL1
   entity.timestamp = event.params.timestamp
 
+  //event.block.baseFeePerGas
+
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash
 
   entity.save()
+
+  if (event.params.kind == 13){
+    const calldata = event.transaction.input
+    const extraGas = 50000
+    let batchDataCost = calldata.length * 16 + extraGas
+    for (let i = 0; i < calldata.length; i++) {
+      if (calldata[i] == 0){
+        batchDataCost = batchDataCost - 12
+      }
+    }
+    let batchReport = new BatchReport(event.params.messageIndex.toHexString())
+    batchReport.batchDataCost = BigInt.fromU64(batchDataCost)
+    batchReport.messageDelivered = event.params.messageIndex.toHexString()
+    batchReport.save()
+  }
 }
 
 export function handleOutboxToggle(event: OutboxToggleEvent): void {

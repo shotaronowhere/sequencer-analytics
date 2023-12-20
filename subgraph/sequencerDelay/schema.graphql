@@ -57,6 +57,21 @@ type MessageDelivered @entity(immutable: true) {
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
+  batchReport: BatchReport @derivedFrom(field: "messageDelivered")
+}
+
+type BatchReport @entity(immutable: true) {
+  id: String!
+  batchDataCost: BigInt!
+  messageDelivered: MessageDelivered!
+  batchReportSequenced: BatchReportSequenced @derivedFrom(field: "batchReport")
+}
+
+type BatchReportSequenced @entity(immutable: true) {
+  id: String!
+  delay: BigInt
+  batchReport: BatchReport!
+  batchNum: BigInt!
 }
 
 type GlobalStat @entity{
