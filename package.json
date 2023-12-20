@@ -2,6 +2,7 @@
   "name": "sequencer-analytics",
   "license": "UNLICENSED",
   "scripts": {
+    "start:batch-report": "npx ts-node src/batchReport.ts",
     "start:gas": "npx ts-node src/arbGas.ts",
     "start:delay": "npx ts-node src/delay.ts",
     "codegen": "yarn codegen:gas && yarn codegen:delay",
@@ -11,8 +12,8 @@
     "build": "cd subgraph/arbGas && graph build",
     "build:gas": "cd subgraph/sequencerDelay && graph build",
     "build:delay": "cd subgraph && graph build",
-    "deploy:delay": "cd subgraph/sequencerDelay && graph deploy --node https://api.thegraph.com/deploy/ shotaronowhere/sequencer-analytics-nova",
-    "deploy:gas": "cd subgraph/arbGas && graph deploy --node https://api.thegraph.com/deploy/ shotaronowhere/arb-gas-analytics-sparse",
+    "deploy:delay": "cd subgraph/sequencerDelay && graph deploy --node https://api.thegraph.com/deploy/ shotaronowhere/sequencer-analytics",
+    "deploy:gas": "cd subgraph/arbGas && graph deploy --node https://api.thegraph.com/deploy/ shotaronowhere/arb-gas-analytics",
     "create-local": "cd subgraph && graph create --node http://localhost:8020/ shotaronowhere/sequencer-analytics",
     "remove-local": "cd subgraph && graph remove --node http://localhost:8020/ shotaronowhere/sequencer-analytics",
     "deploy-local": "cd subgraph && graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 shotaronowhere/sequencer-analytics"
@@ -25,7 +26,8 @@
     "@graphql-codegen/typescript-graphql-request": "^6.0.1",
     "@graphql-codegen/typescript-operations": "^4.0.1",
     "fast-csv": "^4.3.6",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "viem": "^1.20.3"
   },
   "devDependencies": {
     "matchstick-as": "0.5.0"
