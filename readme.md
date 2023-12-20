@@ -21,10 +21,16 @@ $ yarn start:delay
 
 Indexes gas prices for L1 and L2 from perspective of L2.
 
-### Fetch Arb Gas Data
-
 ```bash
 $ yarn start:gas
+```
+
+# Batch Reports
+
+Scans L2 blocks from a public arbitrum one rpc and filters for batch posting reports.
+
+```bash
+$ yarn start:batch-report
 ```
 
 # Results
